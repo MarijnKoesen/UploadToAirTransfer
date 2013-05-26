@@ -1,0 +1,49 @@
+#!/usr/bin/php
+<?php
+error_reporting(E_ALL);
+set_time_limit(0);
+
+/**
+ * Upload a file to a AirTransfer+ host
+ *
+ * @param $host string Host in the format of '192.168.1.34:8080'
+ * @param $filename string The file to upload e.g. 'photo.jpg'
+ */
+function uploadFile($host, $fileName) {
+	// Get parameters
+	$post = array('fileToUpload' => "@" . $fileName);
+	$url = 'http://' . $host . '/Upload';
+
+	// Send file	
+	$curl = curl_init(); 
+
+	curl_setopt($curl, CURLOPT_URL, $url); 
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); 
+	curl_setopt($curl, CURLOPT_POST, 1); 
+	curl_setopt($curl, CURLOPT_POSTFIELDS, $post); 
+	return curl_exec($curl); 
+}
+
+// Take the executable name out of the files array
+$executable = array_shift($argv); 
+
+if ($argc <= 1) {
+	echo "Usage: {$executable} <files..>\n";
+	exit;
+}
+
+// Upload the files
+while(count($argv)) {
+	$file = array_shift($argv);
+
+	if (!file_exists($file)) {
+		echo "Cannot find file '" . $file . "'\n";
+		continue;
+	}
+
+	echo "Uploading " . $file . " to ipad...";
+
+	uploadFile("192.168.1.34:8080", $file);
+	echo "Done.\n";
+}
+
